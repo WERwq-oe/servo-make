@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { Mail, Lock, AlertCircle, Chrome } from 'lucide-react';
+import { Mail, Lock, AlertCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export default function Login() {
@@ -9,7 +9,7 @@ export default function Login() {
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
-    const { login, loginWithGoogle } = useAuth();
+    const { login } = useAuth();
     const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
@@ -110,24 +110,6 @@ export default function Login() {
                             {loading ? 'Signing In...' : 'Sign In'}
                         </button>
                     </form>
-
-                    <div className="relative my-6">
-                        <div className="absolute inset-0 flex items-center">
-                            <div className="w-full border-t border-slate-200" />
-                        </div>
-                        <div className="relative flex justify-center text-sm">
-                            <span className="px-4 bg-white text-slate-500">Or continue with</span>
-                        </div>
-                    </div>
-
-                    <button
-                        onClick={handleGoogleLogin}
-                        disabled={loading}
-                        className="w-full py-3 border-2 border-slate-200 hover:border-slate-300 rounded-lg font-semibold flex items-center justify-center gap-3 transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50"
-                    >
-                        <Chrome size={20} />
-                        <span>Sign in with Google</span>
-                    </button>
 
                     <p className="mt-6 text-center text-slate-600">
                         Don't have an account?{' '}

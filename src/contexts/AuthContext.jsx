@@ -2,13 +2,12 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import {
     createUserWithEmailAndPassword,
     signInWithEmailAndPassword,
-    signInWithPopup,
     signOut,
     onAuthStateChanged,
     updateProfile
 } from 'firebase/auth';
 import { doc, setDoc, getDoc } from 'firebase/firestore';
-import { auth, googleProvider, db } from '../firebase';
+import { auth, db } from '../firebase';
 
 const AuthContext = createContext({});
 
@@ -43,28 +42,6 @@ export function AuthProvider({ children }) {
     // Sign in with email and password
     function login(email, password) {
         return signInWithEmailAndPassword(auth, email, password);
-    }
-
-    // Sign in with Google
-    async function loginWithGoogle() {
-        const result = await signInWithPopup(auth, googleProvider);
-        const user = result.user;
-
-        // Check if user profile exists
-        const userDoc = await getDoc(doc(db, 'users', user.uid));
-        if (!userDoc.exists()) {
-            // Create user profile for new Google users
-            await setDoc(doc(db, 'users', user.uid), {
-                uid: user.uid,
-                email: user.email,
-                displayName: user.displayName,
-                photoURL: user.photoURL,
-                createdAt: new Date(),
-                updatedAt: new Date()
-            });
-        }
-
-        return user;
     }
 
     // Sign out
@@ -135,7 +112,6 @@ export function AuthProvider({ children }) {
         userProfile,
         signup,
         login,
-        loginWithGoogle,
         logout,
         updateUserProfile
     };
