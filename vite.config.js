@@ -8,8 +8,8 @@ export default defineConfig({
     react(),
     tailwindcss(),
   ],
-  // TODO: If deploying to https://<USERNAME>.github.io/<REPO>/, set base to '/<REPO>/'
-  base: '/servo-make/',
+  // Using relative base path for maximum compatibility with GitHub Pages + HashRouter
+  base: './',
   build: {
     chunkSizeWarningLimit: 1000,
     rollupOptions: {
