@@ -1,44 +1,37 @@
-import { db } from '../firebase';
-import { collection, addDoc, doc, getDoc, serverTimestamp } from 'firebase/firestore';
+import LZString from 'lz-string';
 
+// Encode survey data into a URL-safe string
 export const saveSurvey = async (surveyData) => {
     try {
-        const docRef = await addDoc(collection(db, "surveys"), {
-            ...surveyData,
-            createdAt: serverTimestamp(),
-        });
-        return docRef.id;
+        const json = JSON.stringify(surveyData);
+        const compressed = LZString.compressToEncodedURIComponent(json);
+        return compressed;
     } catch (error) {
-        console.error("Error saving survey: ", error);
+        console.error("Error encoding survey:", error);
         throw error;
     }
 };
 
+// Decode survey data from the URL string
 export const getSurvey = async (id) => {
     try {
-        const docRef = doc(db, "surveys", id);
-        const docSnap = await getDoc(docRef);
-
-        if (docSnap.exists()) {
-            return { id: docSnap.id, ...docSnap.data() };
-        } else {
-            throw new Error("Survey not found");
-        }
+        const decompressed = LZString.decompressFromEncodedURIComponent(id);
+        if (!decompressed) throw new Error("Invalid survey ID");
+        return JSON.parse(decompressed);
     } catch (error) {
-        console.error("Error fetching survey: ", error);
+        console.error("Error decoding survey:", error);
         throw error;
     }
 };
 
+// For a serverless app, we can't "submit" to a DB. 
+// We'll simulate success and return the data for the UI to handle (e.g. download/log).
 export const submitResponse = async (surveyId, answers) => {
-    try {
-        await addDoc(collection(db, "responses"), {
-            surveyId,
-            answers,
-            submittedAt: serverTimestamp(),
-        });
-    } catch (error) {
-        console.error("Error submitting response: ", error);
-        throw error;
-    }
+    return new Promise((resolve) => {
+        setTimeout(() => {
+            console.log("Response submitted:", { surveyId, answers });
+            // In a real serverless setup, you might send this to a Google Sheet or EmailJS
+            resolve(true);
+        }, 1000);
+    });
 };

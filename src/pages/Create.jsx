@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useSurvey } from '../hooks/useSurvey';
 import QuestionCard from '../components/editor/QuestionCard';
 import Toolbar from '../components/editor/Toolbar';
+import PreviewModal from '../components/PreviewModal';
 import { AnimatePresence, Reorder, motion } from 'framer-motion';
 import { Save, Eye } from 'lucide-react';
 import { saveSurvey } from '../services/surveyService';
@@ -10,6 +11,7 @@ export default function Create() {
     const { survey, addQuestion, updateQuestion, deleteQuestion, updateSurveyDetails, reorderQuestions } = useSurvey();
     const [isPublishing, setIsPublishing] = useState(false);
     const [publishedId, setPublishedId] = useState(null);
+    const [showPreview, setShowPreview] = useState(false);
 
     const handlePublish = async () => {
         setIsPublishing(true);
@@ -38,7 +40,10 @@ export default function Create() {
                         />
                     </div>
                     <div className="flex items-center gap-3">
-                        <button className="flex items-center gap-2 px-4 py-2 text-slate-600 hover:bg-slate-100 rounded-lg font-medium transition-colors">
+                        <button
+                            onClick={() => setShowPreview(true)}
+                            className="flex items-center gap-2 px-4 py-2 text-slate-600 hover:bg-slate-100 rounded-lg font-medium transition-colors"
+                        >
                             <Eye size={18} /> Preview
                         </button>
                         <button
@@ -57,10 +62,13 @@ export default function Create() {
                 {publishedId && (
                     <div className="mb-8 p-4 bg-emerald-50 border border-emerald-200 rounded-xl flex items-center justify-between text-emerald-800">
                         <div>
-                            <p className="font-bold">Survey Published!</p>
-                            <p className="text-sm mt-1">Share this link: <a href={`#/survey/${publishedId}`} className="underline">{window.location.origin}/#/survey/{publishedId}</a></p>
+                            <p className="font-bold">Survey Ready!</p>
+                            <p className="text-sm mt-1 text-emerald-700">Your survey is encoded in the URL below.</p>
                         </div>
-                        <button onClick={() => navigator.clipboard.writeText(`${window.location.origin}/#/survey/${publishedId}`)} className="px-3 py-1 bg-white rounded border border-emerald-200 text-sm hover:bg-emerald-50">Copy</button>
+                        <div className="flex gap-2">
+                            <a href={`#/survey/${publishedId}`} target="_blank" rel="noreferrer" className="px-3 py-1 bg-emerald-100 rounded border border-emerald-200 text-sm hover:bg-emerald-200 text-emerald-800">Open</a>
+                            <button onClick={() => navigator.clipboard.writeText(`${window.location.origin}${window.location.pathname}#/survey/${publishedId}`)} className="px-3 py-1 bg-white rounded border border-emerald-200 text-sm hover:bg-emerald-50">Copy Link</button>
+                        </div>
                     </div>
                 )}
 
@@ -93,6 +101,13 @@ export default function Create() {
                 {/* Floating Toolbar */}
                 <Toolbar addQuestion={addQuestion} />
             </main>
+
+            {/* Preview Modal */}
+            <PreviewModal
+                isOpen={showPreview}
+                onClose={() => setShowPreview(false)}
+                survey={survey}
+            />
         </div>
     );
 }

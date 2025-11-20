@@ -50,7 +50,10 @@ export default function Results() {
                 <div className="grid gap-6">
                     {survey.questions.map((q) => (
                         <div key={q.id} className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-                            <h3 className="text-lg font-semibold text-slate-900 mb-4">{q.title}</h3>
+                            <h3
+                                className="text-lg font-semibold text-slate-900 mb-4"
+                                dangerouslySetInnerHTML={{ __html: q.title }}
+                            />
 
                             {/* Simple visualization for now - just listing answers */}
                             <div className="space-y-2 max-h-60 overflow-y-auto">

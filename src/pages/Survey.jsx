@@ -65,7 +65,10 @@ export default function Survey() {
                 <form onSubmit={handleSubmit} className="space-y-6">
                     {survey.questions.map((q) => (
                         <div key={q.id} className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-                            <h3 className="text-lg font-medium text-slate-900 mb-4">{q.title} <span className="text-red-500">*</span></h3>
+                            <h3
+                                className="text-lg font-medium text-slate-900 mb-4"
+                                dangerouslySetInnerHTML={{ __html: q.title + ' <span class="text-red-500">*</span>' }}
+                            />
 
                             {q.type === 'text' && (
                                 <input

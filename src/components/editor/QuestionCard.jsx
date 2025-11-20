@@ -1,6 +1,7 @@
 import React from 'react';
-import { Trash2, GripVertical, Plus, Bold, Italic, Underline } from 'lucide-react';
+import { Trash2, GripVertical, Plus } from 'lucide-react';
 import { Reorder, useDragControls } from 'framer-motion';
+import RichTextEditor from './RichTextEditor';
 
 export default function QuestionCard({ question, updateQuestion, deleteQuestion }) {
     const dragControls = useDragControls();
@@ -58,19 +59,11 @@ export default function QuestionCard({ question, updateQuestion, deleteQuestion 
                     <span className="text-xs font-bold uppercase tracking-wider text-indigo-500 bg-indigo-50 px-2 py-1 rounded">
                         {question.type.replace('_', ' ')}
                     </span>
-                    <div className="flex gap-1 ml-auto">
-                        {/* Placeholder for Rich Text Tools - for now just visual */}
-                        <button className="p-1 text-slate-400 hover:text-slate-700"><Bold size={14} /></button>
-                        <button className="p-1 text-slate-400 hover:text-slate-700"><Italic size={14} /></button>
-                        <button className="p-1 text-slate-400 hover:text-slate-700"><Underline size={14} /></button>
-                    </div>
                 </div>
-                <input
-                    type="text"
+                <RichTextEditor
                     value={question.title}
-                    onChange={handleTitleChange}
+                    onChange={(html) => updateQuestion(question.id, { title: html })}
                     placeholder="Type your question here..."
-                    className="w-full text-lg font-medium text-slate-900 placeholder:text-slate-300 border-b border-transparent hover:border-slate-200 focus:border-indigo-500 focus:outline-none transition-colors bg-transparent py-1"
                 />
             </div>
 
