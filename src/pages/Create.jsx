@@ -1,5 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useSurvey } from '../hooks/useSurvey';
+import { useAuth } from '../contexts/AuthContext';
 import QuestionCard from '../components/editor/QuestionCard';
 import Toolbar from '../components/editor/Toolbar';
 import PreviewModal from '../components/PreviewModal';
@@ -8,15 +10,29 @@ import { Save, Eye } from 'lucide-react';
 import { saveSurvey } from '../services/surveyService';
 
 export default function Create() {
+    const navigate = useNavigate();
+    const { currentUser } = useAuth();
     const { survey, addQuestion, updateQuestion, deleteQuestion, updateSurveyDetails, reorderQuestions } = useSurvey();
     const [isPublishing, setIsPublishing] = useState(false);
     const [publishedId, setPublishedId] = useState(null);
     const [showPreview, setShowPreview] = useState(false);
 
+    useEffect(() => {
+        if (!currentUser) {
+            navigate('/login');
+        }
+    }, [currentUser, navigate]);
+
     const handlePublish = async () => {
+        if (!currentUser) {
+            alert('You must be logged in to publish surveys');
+            navigate('/login');
+            return;
+        }
+
         setIsPublishing(true);
         try {
-            const id = await saveSurvey(survey);
+            const id = await saveSurvey(survey, currentUser.uid);
             setPublishedId(id);
         } catch (error) {
             alert("Failed to publish survey. Check console for details.");
@@ -63,7 +79,7 @@ export default function Create() {
                     <div className="mb-8 p-4 bg-emerald-50 border border-emerald-200 rounded-xl flex items-center justify-between text-emerald-800">
                         <div>
                             <p className="font-bold">Survey Ready!</p>
-                            <p className="text-sm mt-1 text-emerald-700">Your survey is encoded in the URL below.</p>
+                            <p className="text-sm mt-1 text-emerald-700">Your survey has been published.</p>
                         </div>
                         <div className="flex gap-2">
                             <a href={`#/survey/${publishedId}`} target="_blank" rel="noreferrer" className="px-3 py-1 bg-emerald-100 rounded border border-emerald-200 text-sm hover:bg-emerald-200 text-emerald-800">Open</a>

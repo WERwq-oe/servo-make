@@ -1,37 +1,57 @@
 import LZString from 'lz-string';
+import { collection, addDoc, getDoc, doc, Timestamp } from 'firebase/firestore';
+import { db } from '../firebase';
 
-// Encode survey data into a URL-safe string
-export const saveSurvey = async (surveyData) => {
+// Save survey to Firestore with user authentication
+export const saveSurvey = async (surveyData, userId) => {
     try {
-        const json = JSON.stringify(surveyData);
-        const compressed = LZString.compressToEncodedURIComponent(json);
-        return compressed;
+        // Add survey to Firestore
+        const docRef = await addDoc(collection(db, 'surveys'), {
+            ...surveyData,
+            userId,
+            createdAt: Timestamp.now(),
+            updatedAt: Timestamp.now()
+        });
+
+        return docRef.id;
     } catch (error) {
-        console.error("Error encoding survey:", error);
+        console.error("Error saving survey:", error);
         throw error;
     }
 };
 
-// Decode survey data from the URL string
+// Get survey by ID (with fallback to compressed format for backwards compatibility)
 export const getSurvey = async (id) => {
     try {
+        // Try to fetch from Firestore first
+        const docRef = doc(db, 'surveys', id);
+        const docSnap = await getDoc(docRef);
+
+        if (docSnap.exists()) {
+            return { id: docSnap.id, ...docSnap.data() };
+        }
+
+        // Fallback: try to decode compressed survey (backwards compatibility)
         const decompressed = LZString.decompressFromEncodedURIComponent(id);
         if (!decompressed) throw new Error("Invalid survey ID");
         return JSON.parse(decompressed);
     } catch (error) {
-        console.error("Error decoding survey:", error);
+        console.error("Error getting survey:", error);
         throw error;
     }
 };
 
-// For a serverless app, we can't "submit" to a DB. 
-// We'll simulate success and return the data for the UI to handle (e.g. download/log).
+// Submit response to Firestore
 export const submitResponse = async (surveyId, answers) => {
-    return new Promise((resolve) => {
-        setTimeout(() => {
-            console.log("Response submitted:", { surveyId, answers });
-            // In a real serverless setup, you might send this to a Google Sheet or EmailJS
-            resolve(true);
-        }, 1000);
-    });
+    try {
+        await addDoc(collection(db, 'responses'), {
+            surveyId,
+            answers,
+            submittedAt: Timestamp.now()
+        });
+        return true;
+    } catch (error) {
+        console.error("Error submitting response:", error);
+        throw error;
+    }
 };
