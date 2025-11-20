@@ -85,23 +85,49 @@ export function AuthProvider({ children }) {
     }
 
     useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, async (user) => {
-            setCurrentUser(user);
+        let unsubscribe;
 
-            if (user) {
-                // Fetch user profile from Firestore
-                const userDoc = await getDoc(doc(db, 'users', user.uid));
-                if (userDoc.exists()) {
-                    setUserProfile(userDoc.data());
-                }
-            } else {
-                setUserProfile(null);
-            }
-
+        // Set a timeout to prevent infinite loading if Firebase isn't configured
+        const loadingTimeout = setTimeout(() => {
+            console.warn('Firebase may not be configured - continuing without auth');
             setLoading(false);
-        });
+        }, 3000);
 
-        return unsubscribe;
+        try {
+            unsubscribe = onAuthStateChanged(auth, async (user) => {
+                clearTimeout(loadingTimeout);
+                setCurrentUser(user);
+
+                if (user) {
+                    try {
+                        // Fetch user profile from Firestore
+                        const userDoc = await getDoc(doc(db, 'users', user.uid));
+                        if (userDoc.exists()) {
+                            setUserProfile(userDoc.data());
+                        }
+                    } catch (error) {
+                        console.error('Error fetching user profile:', error);
+                    }
+                } else {
+                    setUserProfile(null);
+                }
+
+                setLoading(false);
+            }, (error) => {
+                clearTimeout(loadingTimeout);
+                console.error('Auth state change error:', error);
+                setLoading(false);
+            });
+        } catch (error) {
+            clearTimeout(loadingTimeout);
+            console.error('Firebase initialization error:', error);
+            setLoading(false);
+        }
+
+        return () => {
+            clearTimeout(loadingTimeout);
+            if (unsubscribe) unsubscribe();
+        };
     }, []);
 
     const value = {

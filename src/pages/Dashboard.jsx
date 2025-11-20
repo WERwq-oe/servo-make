@@ -68,6 +68,41 @@ export default function Dashboard() {
         );
     }
 
+    // Show welcome page for non-authenticated users
+    if (!currentUser) {
+        return (
+            <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 flex items-center justify-center p-4">
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="text-center max-w-2xl"
+                >
+                    <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-2xl mb-6 shadow-lg">
+                        <span className="text-white text-3xl font-bold">S</span>
+                    </div>
+                    <h1 className="text-4xl font-bold text-slate-900 mb-4">Welcome to Servo Make</h1>
+                    <p className="text-lg text-slate-600 mb-8">
+                        Create beautiful surveys with rich text formatting, collect responses, and analyze data with interactive charts.
+                    </p>
+                    <div className="flex items-center justify-center gap-4">
+                        <Link
+                            to="/login"
+                            className="px-6 py-3 text-slate-700 hover:bg-white border-2 border-slate-300 rounded-lg font-semibold transition-all"
+                        >
+                            Login
+                        </Link>
+                        <Link
+                            to="/signup"
+                            className="px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white rounded-lg font-semibold shadow-lg shadow-indigo-200 transition-all"
+                        >
+                            Get Started
+                        </Link>
+                    </div>
+                </motion.div>
+            </div>
+        );
+    }
+
     return (
         <div className="min-h-screen bg-slate-50">
             {/* Header */}
